@@ -1,0 +1,6 @@
+flask
+supabase
+anthropic
+requests
+flask-cors
+apscheduler
