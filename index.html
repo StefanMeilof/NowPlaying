@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NowPlaying — Your taste on display.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #b737f3;
+    --pink: #ff2ea7;
+    --lime: #adea1e;
+    --dark: #2f2f2f;
+    --darker: #1a1a1a;
+    --card: #242424;
+    --border: #3a3a3a;
+    --muted: #777;
+    --faint: #555;
+  }
+
+  .container {
+    max-width: 1024px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  body {
+    background: var(--dark);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  .colbars {
+    display: flex;
+    height: 7px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .colbars div:nth-child(1) { flex: 3; background: var(--purple); }
+  .colbars div:nth-child(2) { flex: 1; background: #9b3dcc; }
+  .colbars div:nth-child(3) { flex: 2; background: var(--pink); }
+  .colbars div:nth-child(4) { flex: 1.5; background: var(--lime); }
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 2.5rem;
+  }
+  body > .container > nav {
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .nav-logo span { color: var(--pink); }
+  .nav-links { display: flex; align-items: center; gap: 2rem; }
+  .nav-links a { font-size: 13px; color: var(--muted); transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .nav-cta {
+    background: var(--pink);
+    color: #fff;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: opacity 0.2s;
+  }
+  .nav-cta:hover { opacity: 0.85; }
+
+  .hero {
+    padding: 5rem 2.5rem 4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease forwards;
+  }
+  .hero-title {
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 700;
+    line-height: 1.0;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.1s forwards;
+  }
+  .hero-title .pink { color: var(--pink); }
+  .hero-title .purple { color: var(--purple); }
+  .hero-title .lime { color: var(--lime); }
+  .hero-sub {
+    font-size: 18px;
+    font-weight: 400;
+    color: #999;
+    line-height: 1.7;
+    max-width: 500px;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.2s forwards;
+  }
+  .cta-wrap {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.3s forwards;
+  }
+  .btn-primary {
+    background: var(--pink);
+    color: #fff;
+    border: none;
+    padding: 14px 32px;
+    border-radius: 40px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-ghost {
+    color: var(--lime);
+    font-size: 14px;
+    font-weight: 500;
+    border-bottom: 1px solid var(--lime);
+    padding-bottom: 2px;
+    transition: opacity 0.2s;
+  }
+  .btn-ghost:hover { opacity: 0.7; }
+  .cta-note {
+    font-size: 12px;
+    color: var(--faint);
+    margin-top: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.6s ease 0.4s forwards;
+  }
+
+  .how {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-bottom: 1px solid var(--border);
+  }
+  .how-step {
+    padding: 2.5rem;
+    border-right: 1px solid var(--border);
+    transition: background 0.2s;
+  }
+  .how-step:last-child { border-right: none; }
+  .how-step:hover { background: rgba(255,255,255,0.02); }
+  .step-num {
+    font-size: 48px;
+    font-weight: 700;
+    color: #3a3a3a;
+    margin-bottom: 1rem;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .how-step:nth-child(1):hover .step-num { color: var(--purple); }
+  .how-step:nth-child(2):hover .step-num { color: var(--pink); }
+  .how-step:nth-child(3):hover .step-num { color: var(--lime); }
+  .step-title { font-size: 17px; font-weight: 700; margin-bottom: 0.5rem; }
+  .step-body { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .mock-section {
+    padding: 3rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--faint);
+    margin-bottom: 1.75rem;
+  }
+  .mock-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  @media (max-width: 768px) {
+    .mock-columns { grid-template-columns: 1fr; }
+  }
+
+  .chat-mock {
+    background: var(--darker);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .chat-header {
+    background: #1f1f1f;
+    padding: 0.9rem 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .chat-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--pink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .chat-bot-name { font-size: 13px; font-weight: 700; }
+  .chat-bot-status { font-size: 11px; color: var(--lime); margin-left: auto; }
+  .chat-body { padding: 1.25rem 1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .bubble-wrap { display: flex; flex-direction: column; }
+  .bubble-wrap.user { align-items: flex-start; }
+  .bubble-wrap.bot { align-items: flex-end; }
+
+  .bubble {
+    max-width: 82%;
+    padding: 0.6rem 0.9rem;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .bubble.user {
+    background: #2e2e2e;
+    color: #ddd;
+    border: 1px solid var(--border);
+    border-bottom-left-radius: 4px;
+  }
+  .bubble.bot {
+    background: var(--pink);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .bubble.bot strong { color: var(--lime); font-weight: 700; }
+  .chat-gap { height: 0.5rem; }
+
+  .profile-mock {
+    background: var(--darker);
+    border-radius: 16px;
+    padding: 2rem;
+    border: 1px solid var(--border);
+  }
+  .profile-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lime);
+    animation: pulse 2s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .profile-name { font-size: 17px; font-weight: 700; }
+  .profile-url { font-size: 12px; color: var(--faint); margin-left: auto; }
+  .vcard {
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s;
+    cursor: pointer;
+  }
+  .vcard:hover { border-color: #555; }
+  .vcard-thumb {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #1e1e1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .vcard-thumb::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255,255,255,0.018) 0px,
+      rgba(255,255,255,0.018) 1px,
+      transparent 1px,
+      transparent 5px
+    );
+  }
+  .vcard-thumb::after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 10px 0 10px 18px;
+    border-color: transparent transparent transparent rgba(255,255,255,0.35);
+    position: relative;
+    z-index: 1;
+  }
+  .vcard-body { padding: 0.75rem 0.9rem 0.85rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+  .vcard-info { flex: 1; min-width: 0; }
+  .vcard-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 3px;
+    line-height: 1.4;
+  }
+  .vcard-meta { font-size: 11px; color: var(--faint); }
+  .vcard-tag {
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 3px 10px;
+    white-space: nowrap;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .tag-lime { color: var(--lime); border: 1px solid var(--lime); }
+  .tag-pink { color: var(--pink); border: 1px solid var(--pink); }
+  .tag-purple { color: var(--purple); border: 1px solid var(--purple); }
+
+  .why {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .why-card {
+    background: var(--dark);
+    padding: 2.25rem 2.5rem;
+    transition: background 0.2s;
+  }
+  .why-card:hover { background: #333; }
+  .why-icon {
+    font-size: 28px;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .why-title { font-size: 16px; font-weight: 700; margin-bottom: 0.5rem; }
+  .why-body { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .faq-section {
+    padding: 3rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .faq {
+    border-bottom: 1px solid var(--border);
+    padding: 1.25rem 0;
+    cursor: pointer;
+  }
+  .faq:last-child { border-bottom: none; }
+  .faq-q {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+  .faq-q::after {
+    content: '+';
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--pink);
+    flex-shrink: 0;
+  }
+  .faq-a { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .footer {
+    text-align: center;
+    padding: 4rem 2.5rem;
+  }
+  .footer-title {
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+  }
+  .footer-title span { color: var(--pink); }
+  .footer-sub { font-size: 15px; color: var(--muted); margin-bottom: 2.5rem; }
+  .pills {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 1.75rem;
+  }
+  .pill {
+    font-size: 11px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--faint);
+  }
+
+  .tape-bar {
+    height: 5px;
+    display: flex;
+  }
+  .tape-bar div:nth-child(1) { flex: 2; background: var(--purple); }
+  .tape-bar div:nth-child(2) { flex: 1; background: var(--pink); }
+  .tape-bar div:nth-child(3) { flex: 3; background: var(--lime); }
+  .tape-bar div:nth-child(4) { flex: 1; background: var(--pink); }
+  .tape-bar div:nth-child(5) { flex: 2; background: var(--purple); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.25rem; }
+    .nav-links { display: none; }
+    .hero { padding: 3rem 1.25rem 2.5rem; }
+    .how { grid-template-columns: 1fr; }
+    .how-step { border-right: none; border-bottom: 1px solid var(--border); }
+    .how-step:last-child { border-bottom: none; }
+    .mock-section { padding: 2rem 1.25rem; }
+    .why { grid-template-columns: 1fr; }
+    .faq-section { padding: 2rem 1.25rem; }
+    .footer { padding: 3rem 1.25rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="colbars"><div></div><div></div><div></div><div></div></div>
+
+<div class="container">
+<nav>
+  <div class="nav-logo">Now<span>Playing</span></div>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#why">Why</a>
+    <a href="#faq">FAQ</a>
+    <button class="nav-cta">Get started</button>
+  </div>
+</nav>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <div class="hero-eyebrow">NowPlaying</div>
+    <div class="hero-title">
+      A page that<br>
+      <span class="pink">sounds</span> <span class="purple">like</span><br>
+      <span class="lime">you.</span>
+    </div>
+    <p class="hero-sub">Your taste moves fast. NowPlaying keeps up. Add anything you're into right now and it lives on your page for only 10 days, then makes way for what's next. No backlog. No maintenance. Fresh every time.</p>
+    <div class="cta-wrap">
+      <button class="btn-primary">Start your page</button>
+      <a href="#how" class="btn-ghost">See how it works</a>
+    </div>
+    <div class="cta-note">Free. Magic link login, no password. Takes 30 seconds.</div>
+  </div>
+</div>
+
+<div class="container">
+<div class="how" id="how">
+  <div class="how-step">
+    <div class="step-num">01</div>
+    <div class="step-title">Sign in</div>
+    <div class="step-body">Enter your email. Get a magic link. Click it. No password, no form, no profile to fill out. Your page is waiting.</div>
+  </div>
+  <div class="how-step">
+    <div class="step-num">02</div>
+    <div class="step-title">Add a video</div>
+    <div class="step-body">Paste a YouTube link into the chat, hit share on Android, or send it via Telegram. It lands on your page within seconds.</div>
+  </div>
+  <div class="how-step">
+    <div class="step-num">03</div>
+    <div class="step-title">It disappears</div>
+    <div class="step-body">After 10 days the video is gone. Your page always reflects what you're into right now, never what you liked two years ago.</div>
+  </div>
+</div>
+</div>
+
+<div class="container">
+<div class="mock-section">
+  <div class="section-label">Your page</div>
+  <div class="mock-columns">
+
+    <div class="chat-mock">
+      <div class="chat-header">
+        <div class="chat-avatar">NP</div>
+        <div class="chat-bot-name">NowPlaying</div>
+        <div class="chat-bot-status">online</div>
+      </div>
+      <div class="chat-body">
+
+        <div class="bubble-wrap user">
+          <div class="bubble user">what is NowPlaying?</div>
+        </div>
+        <div class="bubble-wrap bot">
+          <div class="bubble bot">it's like a website for people who don't want to manage one.</div>
+        </div>
+
+        <div class="chat-gap"></div>
+
+        <div class="bubble-wrap user">
+          <div class="bubble user">how do i add something?</div>
+        </div>
+        <div class="bubble-wrap bot">
+          <div class="bubble bot">just paste a YouTube link here. or share it directly from your phone.</div>
+        </div>
+
+        <div class="chat-gap"></div>
+
+        <div class="bubble-wrap user">
+          <div class="bubble user">youtube.com/watch?v=dQw4w9WgXcQ</div>
+        </div>
+        <div class="bubble-wrap bot">
+          <div class="bubble bot">added. <strong>Rick Astley — Never Gonna Give You Up</strong> is on your page for 10 days.</div>
+        </div>
+
+        <div class="chat-gap"></div>
+
+        <div class="bubble-wrap user">
+          <div class="bubble user">what's on my page?</div>
+        </div>
+        <div class="bubble-wrap bot">
+          <div class="bubble bot">3 videos live: Kendrick (8d), Four Tet (3d), Rick Astley (just added).</div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="profile-mock">
+      <div class="profile-header">
+        <div class="live-dot"></div>
+        <div class="profile-name">Stefan</div>
+        <div class="profile-url">nowplaying.xyz/stefan</div>
+      </div>
+      <div class="vcard">
+        <div class="vcard-thumb"></div>
+        <div class="vcard-body">
+          <div class="vcard-info">
+            <div class="vcard-title">Kendrick Lamar — Not Like Us</div>
+            <div class="vcard-meta">Music video · 4:34</div>
+          </div>
+          <div class="vcard-tag tag-lime">8d left</div>
+        </div>
+      </div>
+      <div class="vcard">
+        <div class="vcard-thumb"></div>
+        <div class="vcard-body">
+          <div class="vcard-info">
+            <div class="vcard-title">Four Tet at Glastonbury 2024</div>
+            <div class="vcard-meta">Live set · 1:02:14</div>
+          </div>
+          <div class="vcard-tag tag-pink">3d left</div>
+        </div>
+      </div>
+      <div class="vcard">
+        <div class="vcard-thumb"></div>
+        <div class="vcard-body">
+          <div class="vcard-info">
+            <div class="vcard-title">Floating Points — LesAlpx</div>
+            <div class="vcard-meta">Official video · 6:21</div>
+          </div>
+          <div class="vcard-tag tag-purple">1d left</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<div class="container">
+<div class="why" id="why">
+  <div class="why-card">
+    <span class="why-icon" style="color:var(--purple);">&#9889;</span>
+    <div class="why-title">Magic link, no password</div>
+    <div class="why-body">Enter your email, click the link, you're in. Your page is live at nowplaying.xyz/you. Nothing else to set up.</div>
+  </div>
+  <div class="why-card">
+    <span class="why-icon" style="color:var(--lime);">&#9711;</span>
+    <div class="why-title">Always fresh</div>
+  </div>
+  <div class="why-card">
+    <span class="why-icon" style="color:var(--pink);">&#8599;</span>
+    <div class="why-title">Add from anywhere</div>
+    <div class="why-body">Use the chat dashboard, tap share on Android and pick NowPlaying, or send via Telegram. All three update the same page instantly.</div>
+  </div>
+  <div class="why-card">
+    <span class="why-icon" style="color:var(--lime);">&#9679;</span>
+    <div class="why-title">One link, all your newest</div>
+    <div class="why-body">Put your NowPlaying URL in your Instagram bio or WhatsApp status. Anyone who visits always sees what you're into right now.</div>
+  </div>
+</div>
+</div>
+
+<div class="container">
+<div class="faq-section" id="faq">
+  <div class="section-label">Questions</div>
+  <div class="faq">
+    <div class="faq-q">Do I need to create an account?</div>
+    <div class="faq-a">Sort of, but it takes 10 seconds. Enter your email, click the magic link we send you, pick a username. That's the entire setup. No password, ever.</div>
+  </div>
+  <div class="faq">
+    <div class="faq-q">How do I add videos?</div>
+    <div class="faq-a">Three ways. Paste a YouTube link into the chat dashboard on your page. On Android, hit share on any YouTube video and pick NowPlaying from the list. Or send a link via Telegram if you prefer.</div>
+  </div>
+  <div class="faq">
+    <div class="faq-q">What happens after 10 days?</div>
+    <div class="faq-a">The video disappears from your page automatically. You don't have to do anything. Add a new link any time to keep your page alive.</div>
+  </div>
+  <div class="faq">
+    <div class="faq-q">Can people see my email?</div>
+    <div class="faq-a">No. Your public page only shows your username and the videos you share. Your email is never visible to anyone.</div>
+  </div>
+  <div class="faq">
+    <div class="faq-q">Does it work with Spotify or Apple Music?</div>
+    <div class="faq-a">YouTube links only for now. Most tracks, live sets, and music videos are on YouTube anyway, so you're rarely stuck.</div>
+  </div>
+  <div class="faq">
+    <div class="faq-q">Is it free?</div>
+    <div class="faq-a">Yes. Free to use, no subscription, no ads.</div>
+  </div>
+</div>
+</div>
+
+<div class="container">
+  <div class="footer">
+  <div class="footer-title">Start your page<br><span>in 30 seconds.</span></div>
+  <div class="footer-sub">Enter your email. Click the link. You're live.</div>
+  <button class="btn-primary">Get started</button>
+  <div class="pills">
+    <span class="pill">No password</span>
+    <span class="pill">No ads</span>
+    <span class="pill">Free</span>
+    <span class="pill">Works via Android share</span>
+    <span class="pill">Works via Telegram</span>
+  </div>
+</div>
+</div>
+
+<div class="tape-bar"><div></div><div></div><div></div><div></div><div></div></div>
+
+</body>
+</html>
